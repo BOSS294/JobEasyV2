@@ -6,7 +6,7 @@ import ResumeMatchStats from "@/components/ResumeMatchStats";;
 export default async function Home() {
   return (
     <div >
-      <div className="bg-black bg-center h-full">
+      <div className="h-full bg-[#04070d] bg-center">
         <Navbar />
         <Banner1 />
         <FeaturesBanner />
