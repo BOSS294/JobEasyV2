@@ -1,14 +1,15 @@
 'use client';
 
-import { Menu, X, Home, LayoutGrid, CreditCard, LogIn, LogOut, Hexagon } from 'lucide-react';
+import { Menu, X, Home, LayoutGrid, CreditCard, LogIn, Hexagon } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { signIn, signOut } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navbar() {
   const router = useRouter();
+  const { status } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -19,14 +20,10 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleSignOut = async () => {
-    router.push('/');
-    await signOut({ callbackUrl: '/' });
-  };
-
   const navLinks = [
     { name: 'Home', href: '#banner', icon: Home },
     { name: 'Features', href: '#features', icon: LayoutGrid },
+    { name: 'Upload Resume', href: '/resume', icon: CreditCard },
     { name: 'Pricing', href: '#', icon: CreditCard, onClick: () => alert('Coming soon!') },
   ];
 
@@ -76,14 +73,13 @@ export default function Navbar() {
         </div>
 
         {/* Auth Buttons */}
-        <div className="hidden items-center gap-3 md:flex">
-          <motion.button whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }} onClick={handleSignOut} className="flex items-center gap-2 rounded-xl border border-[#2f446f] bg-transparent px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/5">
-            <LogOut className="h-4 w-4" /> Sign out
-          </motion.button>
-          <motion.button whileHover={{ y: -2, boxShadow: "0 10px 25px -5px rgba(46,213,200,0.4)" }} whileTap={{ scale: 0.95 }} onClick={() => signIn('credentials')} className="solid-btn-primary flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm">
-            <LogIn className="h-4 w-4" /> Sign in
-          </motion.button>
-        </div>
+        {status !== 'authenticated' && (
+          <div className="hidden items-center gap-3 md:flex">
+            <motion.button whileHover={{ y: -2, boxShadow: "0 10px 25px -5px rgba(46,213,200,0.4)" }} whileTap={{ scale: 0.95 }} onClick={() => signIn('credentials')} className="solid-btn-primary flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm">
+              <LogIn className="h-4 w-4" /> Sign in
+            </motion.button>
+          </div>
+        )}
 
         {/* Mobile Toggle */}
         <button className="rounded-xl border border-white/10 bg-white/5 p-2 text-[#d9e7ff] backdrop-blur-md transition hover:bg-white/10 md:hidden" onClick={() => setIsOpen(!isOpen)}>
@@ -117,10 +113,11 @@ export default function Navbar() {
                   </motion.div>
                 );
               })}
-              <div className="mt-4 flex flex-col gap-3 border-t border-white/10 pt-4">
-                <button onClick={handleSignOut} className="flex items-center justify-center gap-2 rounded-xl border border-[#2f446f] bg-transparent py-3 font-bold text-white"><LogOut className="h-5 w-5"/> Sign out</button>
-                <button onClick={() => signIn('credentials')} className="solid-btn-primary flex items-center justify-center gap-2 rounded-xl py-3 text-lg"><LogIn className="h-5 w-5"/> Sign in</button>
-              </div>
+              {status !== 'authenticated' && (
+                <div className="mt-4 flex flex-col gap-3 border-t border-white/10 pt-4">
+                  <button onClick={() => signIn('credentials')} className="solid-btn-primary flex items-center justify-center gap-2 rounded-xl py-3 text-lg"><LogIn className="h-5 w-5"/> Sign in</button>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
