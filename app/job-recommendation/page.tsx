@@ -1,15 +1,46 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Search } from "lucide-react";
+import { Search, AlertTriangle, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { filterJobs } from "@/actions/filterJobs";
+import hiringCafeJobs from "@/data/hiring-cafe-jobs.json";
+import Navbar from "@/components/LandingPage/Navbar";
+import Link from "next/link";
+
+type JobSkill = { name: string };
+type JobCard = {
+  JobName: string;
+  CompanyName: string;
+  Location?: string | null;
+  Description?: string | null;
+  Salary?: string | null;
+  Experience?: number | null;
+  skills: JobSkill[];
+  matchPercent: number;
+};
+
+type ResumeData = {
+  Skills?: string;
+  Experience?: string;
+};
+
+type ExternalJob = {
+  title: string;
+  company: string;
+  location?: string | string[];
+  salary?: string;
+  skills?: string[];
+  experience?: string;
+};
 
 const JobRecommendationsPage: React.FC = () => {
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  const [jobs, setJobs] = useState<any[]>([]);
+  const [jobs, setJobs] = useState<JobCard[]>([]);
+  const [fallbackJobs, setFallbackJobs] = useState<JobCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [missingFields, setMissingFields] = useState<string[]>([]);
+  const [hasResumeData, setHasResumeData] = useState(true);
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -17,7 +48,7 @@ const JobRecommendationsPage: React.FC = () => {
         const resumeData = localStorage.getItem("resumeData");
 
         if (resumeData) {
-          const parsedData = JSON.parse(resumeData);
+          const parsedData: ResumeData = JSON.parse(resumeData);
 
           const storedSkills =
             parsedData.Skills?.split(",")
@@ -25,10 +56,15 @@ const JobRecommendationsPage: React.FC = () => {
               .filter(Boolean) || [];
 
           const storedExperience = parsedData.Experience?.match(/\d+/)?.[0] || "0";
+          const missing: string[] = [];
+
+          if (storedSkills.length === 0) missing.push("skills");
+          if (!parsedData.Experience?.trim()) missing.push("experience");
+          setMissingFields(missing);
 
           const jobData = await filterJobs(storedSkills, storedExperience);
-          const scoredJobs = jobData.map((job: any) => {
-            const jobSkills = (job.skills || []).map((s: any) => s.name?.toLowerCase());
+          const scoredJobs: JobCard[] = jobData.map((job) => {
+            const jobSkills = (job.skills || []).map((s: JobSkill) => s.name?.toLowerCase());
             const matchedSkills = jobSkills.filter((skill: string) =>
               storedSkills.includes(skill)
             );
@@ -43,8 +79,44 @@ const JobRecommendationsPage: React.FC = () => {
           });
 
           setJobs(scoredJobs);
+
+          const fallback: JobCard[] = (hiringCafeJobs as ExternalJob[])
+            .slice(0, 8)
+            .map((job) => {
+              const normalizedSkills = (job.skills ?? []).map((skill) => ({ name: skill }));
+              const jobSkillNames = normalizedSkills.map((skill) => skill.name.toLowerCase());
+              const matchedSkills = jobSkillNames.filter((skill) => storedSkills.includes(skill));
+              const score = Math.max(55, Math.round((matchedSkills.length / (jobSkillNames.length || 1)) * 100));
+
+              return {
+                JobName: job.title,
+                CompanyName: job.company,
+                Location: Array.isArray(job.location) ? job.location.join(", ") : job.location ?? "Remote",
+                Description: "Fallback suggestion from our broader job pool.",
+                Salary: job.salary ?? "Not disclosed",
+                Experience: null,
+                skills: normalizedSkills,
+                matchPercent: score,
+              };
+            });
+
+          setFallbackJobs(fallback);
         } else {
-          console.error("No resume data found in localStorage.");
+          setHasResumeData(false);
+          setMissingFields(["skills", "experience"]);
+          const fallbackOnly: JobCard[] = (hiringCafeJobs as ExternalJob[])
+            .slice(0, 8)
+            .map((job) => ({
+              JobName: job.title,
+              CompanyName: job.company,
+              Location: Array.isArray(job.location) ? job.location.join(", ") : job.location ?? "Remote",
+              Description: "General recommendation while we wait for your resume data.",
+              Salary: job.salary ?? "Not disclosed",
+              Experience: null,
+              skills: (job.skills ?? []).map((skill) => ({ name: skill })),
+              matchPercent: 60,
+            }));
+          setFallbackJobs(fallbackOnly);
         }
       } catch (error) {
         console.error("Error fetching jobs:", error);
@@ -55,89 +127,131 @@ const JobRecommendationsPage: React.FC = () => {
 
     fetchJobs();
   }, []);
-  const filteredJobs = jobs.filter((job: any) =>
+
+  const filteredJobs = jobs.filter((job) =>
     job.JobName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     job.CompanyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    job.skills?.some((skill: any) =>
+    job.skills?.some((skill) =>
       skill.name?.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
+  const filteredFallbackJobs = fallbackJobs.filter((job) =>
+    job.JobName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    job.CompanyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    job.skills?.some((skill) => skill.name?.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
   return (
-    <div className="min-h-screen bg-black text-white px-6 py-10 relative">
+    <main className="min-h-screen bg-[#04070d] text-white">
+      <Navbar />
+      <div className="px-6 py-28 md:px-10">
       {/* Header */}
-      <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between">
+      <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-400 text-transparent bg-clip-text">
+          <h1 className="text-2xl font-black md:text-4xl">
             Job Recommendations
           </h1>
-          <p className="text-gray-400 text-sm mt-1">Based on your resume analysis</p>
+          <p className="mt-1 text-sm text-[#9fb1cc]">Based on your resume analysis and skill mapping</p>
         </div>
-        <div className="flex items-center gap-2 mt-4 md:mt-0">
+        <div className="flex items-center gap-2 md:mt-0">
           <div className="relative">
             <input
               type="text"
               placeholder="Search jobs..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-[#111] border border-gray-700 rounded-full pl-10 pr-4 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="rounded-full border border-[#2f446f] bg-[#091224] py-2 pl-10 pr-4 text-sm placeholder-[#7c95b9] focus:outline-none"
             />
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-[#7c95b9]" />
           </div>
         </div>
       </div>
 
+      {(missingFields.length > 0 || !hasResumeData) && (
+        <div className="mb-6 rounded-2xl border border-[#8b6530] bg-[#2a1f12]/70 p-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="mt-0.5 h-5 w-5 text-[#f2b353]" />
+            <div>
+              <p className="font-semibold text-[#ffd79b]">Resume details are incomplete</p>
+              <p className="mt-1 text-sm text-[#e9cda1]">
+                Missing: {missingFields.join(", ")}. Add them for better-quality matches.
+              </p>
+              <Link href="/resume" className="mt-2 inline-block text-sm font-bold text-[#ffd79b] underline">
+                Update resume input
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Loader */}
       {loading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-purple-500 border-solid"></div>
+          <div className="h-12 w-12 animate-spin rounded-full border-t-4 border-[#4b79ff] border-solid"></div>
         </div>
       ) : (
-        <div className="space-y-6">
-          
-          {filteredJobs.map((job: any, idx) => (
+        <>
+          {filteredJobs.length === 0 && (
+            <div className="mb-6 rounded-2xl border border-[#2f446f] bg-[#0b1324]/90 p-5">
+              <div className="flex items-start gap-3">
+                <Sparkles className="mt-0.5 h-5 w-5 text-[#2ed5c8]" />
+                <div>
+                  <p className="font-semibold">No exact recommendations found</p>
+                  <p className="mt-1 text-sm text-[#9fb1cc]">
+                    Showing fallback recommendations from our broader dataset so you still have options to apply.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-6">
+          {(filteredJobs.length > 0 ? filteredJobs : filteredFallbackJobs).map((job, idx) => (
             <motion.div
-              key={idx}
+              key={`${job.JobName}-${job.CompanyName}-${idx}`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
-              className="hover:shadow-xl hover:cursor-pointer hover:shadow-cyan-500 bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] p-6 rounded-2xl border border-white/10 shadow-inner relative"
+              className="relative rounded-2xl border border-white/10 bg-[#0b1324]/90 p-6 shadow-inner"
             >
               <div className="flex justify-between items-start">
                 <div>
                   <h2 className="text-xl font-semibold">{job.JobName}</h2>
-                  <p className="text-sm text-gray-400">{job.CompanyName}</p>
-                  <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                  <p className="text-sm text-[#9fb1cc]">{job.CompanyName}</p>
+                  <p className="mt-1 flex items-center gap-1 text-sm text-[#7f95b7]">
                     📍 {job.Location || "N/A"}
                   </p>
-                  <p className="mt-3 text-sm text-gray-300">
+                  <p className="mt-3 text-sm text-[#c7d5ec]">
                     {job.Description || "No description provided."}
                   </p>
                 </div>
-                <div className="bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-400 text-black text-xs font-bold px-3 py-1 rounded-full">
+                <div className="rounded-full bg-[#2ed5c8] px-3 py-1 text-xs font-bold text-[#06211d]">
                   {job.matchPercent}% Match
                 </div>
               </div>
 
               <div className="flex flex-wrap gap-2 mt-4">
-                {(job.skills || []).map((skill: any, i: number) => (
+                {(job.skills || []).slice(0, 8).map((skill, i: number) => (
                   <span
                     key={i}
-                    className="text-xs bg-white/10 text-white px-3 py-1 rounded-full"
+                    className="rounded-full bg-[#10203a] px-3 py-1 text-xs text-[#d1dff5]"
                   >
                     {skill.name}
                   </span>
                 ))}
               </div>
 
-              <div className="flex justify-between items-center mt-4 text-sm text-gray-400">
+              <div className="mt-4 flex items-center justify-between text-sm text-[#89a2c5]">
                 <span>{job.Salary || "Not Disclosed"} • Posted Recently</span>
               </div>
             </motion.div>
           ))}
         </div>
+        </>
       )}
-    </div>
+      </div>
+    </main>
   );
 };
 
