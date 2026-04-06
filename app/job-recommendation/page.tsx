@@ -18,6 +18,7 @@ type JobCard = {
   Experience?: number | null;
   skills: JobSkill[];
   matchPercent: number;
+  matchedSkills: string[];
 };
 
 type ResumeData = {
@@ -75,6 +76,7 @@ const JobRecommendationsPage: React.FC = () => {
             return {
               ...job,
               matchPercent: skillMatchPercent,
+              matchedSkills,
             };
           });
 
@@ -97,6 +99,7 @@ const JobRecommendationsPage: React.FC = () => {
                 Experience: null,
                 skills: normalizedSkills,
                 matchPercent: score,
+                matchedSkills,
               };
             });
 
@@ -115,6 +118,7 @@ const JobRecommendationsPage: React.FC = () => {
               Experience: null,
               skills: (job.skills ?? []).map((skill) => ({ name: skill })),
               matchPercent: 60,
+              matchedSkills: [],
             }));
           setFallbackJobs(fallbackOnly);
         }
@@ -225,6 +229,11 @@ const JobRecommendationsPage: React.FC = () => {
                   <p className="mt-3 text-sm text-[#c7d5ec]">
                     {job.Description || "No description provided."}
                   </p>
+                  {job.matchedSkills.length > 0 && (
+                    <p className="mt-2 text-xs font-semibold text-[#7fd7cf]">
+                      Recommended because: {job.matchedSkills.slice(0, 4).join(", ")}
+                    </p>
+                  )}
                 </div>
                 <div className="rounded-full bg-[#2ed5c8] px-3 py-1 text-xs font-bold text-[#06211d]">
                   {job.matchPercent}% Match
