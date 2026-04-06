@@ -3,7 +3,7 @@
 import { motion, useMotionValue, useSpring, useTransform, useScroll } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRef, useEffect } from 'react';
+import { useRef } from 'react';
 import { Sparkles, ArrowRight, BrainCircuit } from 'lucide-react';
 
 export default function Banner1() {
