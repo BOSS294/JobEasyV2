@@ -34,7 +34,7 @@ export default function Reviews() {
               <div className="flex gap-1 mb-4">
                 {[...Array(5)].map((_, idx) => <Star key={idx} className="w-5 h-5 fill-[#2ed5c8] text-[#2ed5c8]" />)}
               </div>
-              <p className="text-lg text-white mb-8 italic">"{review.text}"</p>
+              <p className="text-lg text-white mb-8 italic">&ldquo;{review.text}&rdquo;</p>
               <div className="flex justify-between items-end border-t border-white/10 pt-4">
                 <div>
                   <h4 className="font-bold text-[#ecf3ff]">{review.name}</h4>

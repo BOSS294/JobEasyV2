@@ -4,7 +4,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRef } from 'react';
-import { BriefcaseBusiness, Sparkles, TrendingUp } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 export default function Banner1() {
   const containerRef = useRef<HTMLDivElement>(null);

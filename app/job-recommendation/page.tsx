@@ -27,9 +27,7 @@ const JobRecommendationsPage: React.FC = () => {
           const storedExperience = parsedData.Experience?.match(/\d+/)?.[0] || "0";
 
           const jobData = await filterJobs(storedSkills, storedExperience);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const scoredJobs = jobData.map((job: any) => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const jobSkills = (job.skills || []).map((s: any) => s.name?.toLowerCase());
             const matchedSkills = jobSkills.filter((skill: string) =>
               storedSkills.includes(skill)
@@ -61,7 +59,6 @@ const JobRecommendationsPage: React.FC = () => {
   const filteredJobs = jobs.filter((job: any) =>
     job.JobName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     job.CompanyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     job.skills?.some((skill: any) =>
       skill.name?.toLowerCase().includes(searchTerm.toLowerCase())
     )
