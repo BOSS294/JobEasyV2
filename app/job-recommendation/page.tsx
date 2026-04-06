@@ -55,7 +55,6 @@ const JobRecommendationsPage: React.FC = () => {
 
     fetchJobs();
   }, []);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const filteredJobs = jobs.filter((job: any) =>
     job.JobName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     job.CompanyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||

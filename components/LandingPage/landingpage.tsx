@@ -157,7 +157,7 @@ export default function LandingPage() {
             <span className="bg-gradient-to-b from-white to-[#4b79ff] bg-clip-text text-transparent">Precision.</span>
           </h1>
           <p className="mx-auto mt-8 max-w-2xl text-lg font-medium text-[#9fb1cc] md:text-xl">
-            The world's most advanced AI-powered job matching engine. Analyze skills, uncover gaps, and land your dream role in seconds.
+            The world&apos;s most advanced AI-powered job matching engine. Analyze skills, uncover gaps, and land your dream role in seconds.
           </p>
           <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <button className="group relative flex h-14 items-center justify-center gap-3 overflow-hidden rounded-2xl bg-[#2ed5c8] px-8 text-lg font-black text-[#04070d] transition-all hover:scale-105 active:scale-95">
