@@ -92,3 +92,11 @@ body {
   background: #24365b;
   transform: translateY(-2px);
 }
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
