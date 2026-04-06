@@ -26,14 +26,17 @@ npm install
 Create a `.env` file in project root with:
 
 ```env
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DB_NAME"
+DATABASE_URL="postgresql://postgres.PROJECT_REF:PASSWORD@REGION.pooler.supabase.com:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres.PROJECT_REF:PASSWORD@db.PROJECT_REF.supabase.co:5432/postgres"
 NEXTAUTH_SECRET="your_random_secret"
+NEXTAUTH_URL="http://localhost:3000"
 GOOGLE_CLIENT_ID="your_google_client_id"
 GOOGLE_CLIENT_SECRET="your_google_client_secret"
 ```
 
 Notes:
 - `DATABASE_URL` is required.
+- `DIRECT_URL` is required for Prisma migrations.
 - `NEXTAUTH_SECRET` is required for auth token/session signing.
 - Google keys are needed only for Google provider sign-in.
 
@@ -50,6 +53,12 @@ If DB already has schema and you only need to sync client:
 
 ```bash
 npx prisma generate
+```
+
+For production deploys (for example Vercel), run:
+
+```bash
+npm run db:deploy
 ```
 
 ---

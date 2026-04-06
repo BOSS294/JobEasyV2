@@ -9,8 +9,10 @@ This page lists core project config and required runtime settings.
 Required:
 
 ```env
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DB_NAME"
+DATABASE_URL="postgresql://postgres.PROJECT_REF:PASSWORD@REGION.pooler.supabase.com:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres.PROJECT_REF:PASSWORD@db.PROJECT_REF.supabase.co:5432/postgres"
 NEXTAUTH_SECRET="long_random_secret"
+NEXTAUTH_URL="https://your-app.vercel.app"
 ```
 
 Optional (if Google auth enabled):
@@ -68,9 +70,11 @@ Global stylesheet:
 
 From `package.json`:
 - Build step explicitly runs Prisma generate before Next build.
+- Production DB migrations can be applied with `npm run db:deploy`.
 
 ```json
-"build": "prisma generate && next build"
+"build": "prisma generate && next build",
+"db:deploy": "prisma migrate deploy"
 ```
 
 This is important for environments where Prisma client is not pre-generated.
