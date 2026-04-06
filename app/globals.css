@@ -18,68 +18,77 @@ html {
 
 body {
   color: var(--text-main);
+  background-color: var(--surface-0);
+  overflow-x: hidden;
+}
+
+/* Deep 3D Parallax Background Layer */
+.parallax-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
   background:
-    radial-gradient(70% 45% at 15% 5%, rgba(75, 121, 255, 0.22), transparent 60%),
-    radial-gradient(55% 35% at 90% 30%, rgba(46, 213, 200, 0.15), transparent 55%),
+    radial-gradient(80% 60% at 15% 5%, rgba(75, 121, 255, 0.15), transparent 60%),
+    radial-gradient(65% 45% at 90% 30%, rgba(46, 213, 200, 0.12), transparent 55%),
     linear-gradient(180deg, var(--surface-1) 0%, var(--surface-0) 55%, #03050a 100%);
 }
 
 .mesh-overlay {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 36px 36px;
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+  transform: perspective(500px) rotateX(10deg) scale(1.2);
+  transform-origin: top center;
 }
 
 .glass-panel {
-  background: linear-gradient(145deg, rgba(16, 27, 46, 0.85), rgba(7, 13, 24, 0.9));
-  border: 1px solid rgba(139, 164, 203, 0.2);
+  background: linear-gradient(145deg, rgba(16, 27, 46, 0.6), rgba(7, 13, 24, 0.8));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(139, 164, 203, 0.15);
   box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 30px 60px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .elevated-3d {
-  transform: perspective(1200px) translateZ(0);
-  transition: transform 280ms ease, box-shadow 280ms ease, border-color 280ms ease;
+  transform-style: preserve-3d;
+  transition: transform 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 400ms ease;
 }
 
 .elevated-3d:hover {
-  transform: perspective(1200px) rotateX(3deg) rotateY(-3deg) translateY(-5px);
+  transform: perspective(1200px) rotateX(4deg) rotateY(-4deg) translateZ(20px);
+  box-shadow: 
+    0 40px 80px rgba(46, 213, 200, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .solid-btn-primary {
-  background: var(--accent-cyan);
+  background: linear-gradient(135deg, #2ed5c8, #1aa399);
   color: #05211d;
-  font-weight: 700;
+  font-weight: 800;
+  box-shadow: 0 10px 20px rgba(46, 213, 200, 0.3);
+  transition: all 0.3s ease;
 }
 
 .solid-btn-primary:hover {
-  background: #44e0d4;
+  transform: translateY(-2px);
+  box-shadow: 0 15px 25px rgba(46, 213, 200, 0.4);
 }
 
 .solid-btn-secondary {
-  background: #1a2744;
+  background: linear-gradient(135deg, #1a2744, #121b2e);
   color: var(--text-main);
   font-weight: 700;
+  border: 1px solid rgba(139, 164, 203, 0.2);
+  transition: all 0.3s ease;
 }
 
 .solid-btn-secondary:hover {
   background: #24365b;
-}
-
-@keyframes floatSlow {
-  0% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-9px);
-  }
-  100% {
-    transform: translateY(0px);
-  }
-}
-
-.floating-orb {
-  animation: floatSlow 6s ease-in-out infinite;
+  transform: translateY(-2px);
 }
