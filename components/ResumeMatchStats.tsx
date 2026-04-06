@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from 'react';
+import React from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { Users, Building2, Target, Heart, MousePointer2 } from 'lucide-react';
 
@@ -122,7 +122,7 @@ const ResumeMatchStats: React.FC = () => {
             transition={{ delay: 0.2, duration: 0.8 }}
             className="mx-auto max-w-2xl text-lg font-medium leading-relaxed text-[#9fb1cc] md:text-xl"
           >
-            We don't just find jobs; we engineer career alignment. Join thousands of professionals making data-driven moves.
+            We don&apos;t just find jobs; we engineer career alignment. Join thousands of professionals making data-driven moves.
           </motion.p>
         </div>
 
