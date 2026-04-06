@@ -21,8 +21,8 @@ export default function Navbar() {
   }, []);
 
   const navLinks = [
-    { name: 'Home', href: '#banner', icon: Home },
-    { name: 'Features', href: '#features', icon: LayoutGrid },
+    { name: 'Home', href: 'https://www.vanshthakur.com/#banner', icon: Home },
+    { name: 'Features', href: 'https://www.vanshthakur.com/#features', icon: LayoutGrid },
     { name: 'Upload Resume', href: '/resume', icon: CreditCard },
     { name: 'Pricing', href: '#', icon: CreditCard, onClick: () => alert('Coming soon!') },
   ];

@@ -45,26 +45,49 @@ export async function filterJobs(skills: string[], experience: string) {
   const normalizedSkills = skills.map((skill) => skill.toLowerCase());
   const experienceYears = parseInt(experience, 10);
 
-  const dbJobs = await prisma.jobs.findMany({
-    where: {
+  const whereWithSkills = {
+    ...(normalizedSkills.length > 0 && {
       skills: {
         some: {
           name: {
             in: normalizedSkills,
-            mode: 'insensitive'
+            mode: 'insensitive' as const,
           },
         },
       },
-      ...(experience && !Number.isNaN(experienceYears) && {
-        Experience: {
-          lte: experienceYears,
+    }),
+  };
+
+  let dbJobs: JobWithSkills[] = [];
+
+  try {
+    dbJobs = await prisma.jobs.findMany({
+      where: {
+        ...whereWithSkills,
+        ...(experience && !Number.isNaN(experienceYears) && {
+          Experience: {
+            lte: experienceYears,
+          },
+        }),
+      },
+      include: {
+        skills: true,
+      },
+    }) as unknown as JobWithSkills[];
+  } catch (error: unknown) {
+    const prismaError = error as { code?: string };
+    if (prismaError.code === 'P2022') {
+      // Older databases may not have Jobs.Experience yet; retry without experience filtering.
+      dbJobs = await prisma.jobs.findMany({
+        where: whereWithSkills,
+        include: {
+          skills: true,
         },
-      }),
-    },
-    include: {
-      skills: true,
-    },
-  });
+      }) as unknown as JobWithSkills[];
+    } else {
+      throw error;
+    }
+  }
 
   const externalMatches = (hiringCafeJobs as ExternalJob[])
     .filter((job) => {
