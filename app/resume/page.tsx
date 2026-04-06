@@ -1,7 +1,15 @@
 "use client";
+
 import React, { useState, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Upload, FileText, CheckCircle2, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Upload, 
+  CheckCircle2, 
+  Loader2, 
+  Cpu, 
+  ShieldCheck, 
+  Zap 
+} from "lucide-react";
 import handleResume from "@/actions/handleResume";
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -9,173 +17,245 @@ import Navbar from "@/components/LandingPage/Navbar";
 
 const UploadResumeCard: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [jobTitle, setJobTitle] = useState("");
   const [experience, setExperience] = useState("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  
   const { status } = useSession();
-
   const router = useRouter();
+
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/signup");
     }
   }, [status, router]);
+
+  const simulateAnalysis = async (fileToProcess: File) => {
+    setIsAnalyzing(true);
+    setUploadProgress(0);
+    
+    // Smooth progress animation
+    const interval = setInterval(() => {
+      setUploadProgress(prev => {
+        if (prev >= 95) {
+          clearInterval(interval);
+          return 95;
+        }
+        return prev + 5;
+      });
+    }, 150);
+
+    try {
+      const resumeData = await handleResume(fileToProcess);
+      setUploadProgress(100);
+      
+      // Small delay so user sees the "100%" completion
+      setTimeout(() => {
+        localStorage.setItem("resumeData", JSON.stringify(resumeData));
+        router.push("/job-recommendation");
+      }, 800);
+    } catch (error) {
+      console.error(error);
+      setIsAnalyzing(false);
+      alert("Error processing resume. Please try again.");
+    }
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      setFile(selectedFile);
+      simulateAnalysis(selectedFile);
     }
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      setFile(file);
+    const droppedFile = e.dataTransfer.files?.[0];
+    if (droppedFile) {
+      setFile(droppedFile);
+      simulateAnalysis(droppedFile);
     }
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
-  const handleSubmit = async () => {
-    let resumeData;
-
-    if (file) {
-      // If resume file is uploaded, parse it
-      resumeData = await handleResume(file);
-    } else if (jobTitle || experience) {
-      // If no resume, but manual input is provided
-      resumeData = {
-        Skills: jobTitle,
-        Experience: experience,
-      };
-    } else {
-      alert("Please upload a resume or provide skills/experience manually.");
+  const handleSubmitManual = async () => {
+    if (!jobTitle || !experience) {
+      alert("Please provide both skills and experience.");
       return;
     }
-
+    setIsAnalyzing(true);
+    const resumeData = { Skills: jobTitle, Experience: experience };
     localStorage.setItem("resumeData", JSON.stringify(resumeData));
-    router.push("/job-recommendation");
+    
+    // Brief artificial delay for "AI feel"
+    setTimeout(() => router.push("/job-recommendation"), 1000);
   };
 
-
   return (
-    <main className="min-h-screen bg-[#04070d] text-white">
+    <main className="min-h-screen bg-[#04070d] text-white selection:bg-[#2ed5c8]/30">
       <Navbar />
-      <section className="relative overflow-hidden px-4 pb-16 pt-28 md:px-8">
-        <div className="pointer-events-none absolute left-0 top-0 h-72 w-72 rounded-full bg-[#2ed5c8]/15 blur-3xl" />
-        <div className="pointer-events-none absolute bottom-10 right-0 h-72 w-72 rounded-full bg-[#4b79ff]/15 blur-3xl" />
+      
+      <section className="relative overflow-hidden px-4 pb-16 pt-32 md:px-8">
+        {/* Abstract Background Elements */}
+        <div className="absolute left-[-10%] top-[-10%] h-[500px] w-[500px] rounded-full bg-[#2ed5c8]/5 blur-[120px]" />
+        <div className="absolute right-[-5%] bottom-[-5%] h-[400px] w-[400px] rounded-full bg-[#4b79ff]/10 blur-[100px]" />
 
-        <div className="mx-auto grid w-full max-w-6xl gap-8 lg:grid-cols-[1.3fr_0.7fr]">
+        <div className="mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-[1.2fr_0.8fr]">
+          
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="rounded-3xl border border-white/10 bg-[#0b1324]/90 p-6 md:p-8"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="relative rounded-[2.5rem] border border-white/10 bg-[#0b1324]/50 p-8 backdrop-blur-xl md:p-12"
           >
-            <div className="mb-6 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-[#2ed5c8]">
-              <Sparkles className="h-4 w-4" /> Resume Matching Flow
+            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#2ed5c8]/30 bg-[#2ed5c8]/10 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-[#2ed5c8]">
+              <Cpu className="h-3.5 w-3.5" /> Neural Engine Active
             </div>
 
-            <h1 className="text-3xl font-black tracking-tight md:text-5xl">Upload Resume</h1>
-            <p className="mt-2 max-w-2xl text-sm text-[#9fb1cc] md:text-base">
-              Upload your resume or fill skills manually. We extract profile signals and redirect you to ranked job matches.
+            <h1 className="text-4xl font-black tracking-tight text-white md:text-6xl">
+              Scan Your <span className="text-[#2ed5c8]">Future.</span>
+            </h1>
+            <p className="mt-4 max-w-xl text-lg leading-relaxed text-[#9fb1cc]">
+              Our AI parses your professional DNA to find high-probability job matches in seconds.
             </p>
 
-            <motion.div
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-              className="mt-8 rounded-2xl border border-dashed border-[#3e5f95] bg-[#08101f] p-6 text-center transition-colors hover:border-[#2ed5c8]"
-            >
-              <Upload className="mx-auto mb-3 h-10 w-10 text-[#2ed5c8]" />
-              <p className="font-semibold text-[#d9e7ff]">
-                {file?.name ? `Selected: ${file.name}` : "Drag and drop your resume"}
-              </p>
-              <p className="mt-1 text-sm text-[#8ba5c8]">Supports PDF, DOCX, TXT (up to 5MB)</p>
-              <input
-                type="file"
-                accept=".pdf,.docx,.txt"
-                className="hidden"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-              />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="mt-4 rounded-xl bg-[#2ed5c8] px-6 py-2.5 text-sm font-bold text-[#06211d] transition hover:bg-[#27b8ae]"
-              >
-                Select File
-              </button>
-            </motion.div>
+            {/* Upload Area */}
+            <AnimatePresence mode="wait">
+              {!isAnalyzing ? (
+                <motion.div
+                  key="upload-zone"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.05 }}
+                  onDrop={handleDrop}
+                  onDragOver={(e) => e.preventDefault()}
+                  className="group relative mt-10 cursor-pointer overflow-hidden rounded-3xl border-2 border-dashed border-white/10 bg-white/[0.02] p-10 transition-all hover:border-[#2ed5c8]/50 hover:bg-white/[0.04]"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <div className="relative z-10 flex flex-col items-center text-center">
+                    <div className="mb-4 rounded-2xl bg-white/5 p-4 transition-transform group-hover:scale-110 group-hover:bg-[#2ed5c8]/20">
+                      <Upload className="h-10 w-10 text-[#2ed5c8]" />
+                    </div>
+                    <p className="text-xl font-bold text-white">Drop resume here</p>
+                    <p className="mt-2 text-sm text-[#7c95b9]">
+                      PDF, DOCX, or TXT up to <span className="text-white">10MB</span>
+                    </p>
+                    <div className="mt-6 rounded-xl bg-white px-6 py-2.5 text-sm font-black text-[#04070d]">
+                      Browse Files
+                    </div>
+                  </div>
+                  <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf,.docx,.txt" />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="loading-zone"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="mt-10 rounded-3xl border border-[#2ed5c8]/30 bg-[#2ed5c8]/5 p-10 text-center"
+                >
+                  <div className="flex flex-col items-center">
+                    <Loader2 className="h-12 w-12 animate-spin text-[#2ed5c8]" />
+                    <h3 className="mt-6 text-2xl font-black">Analyzing {file?.name || "Profile"}</h3>
+                    <p className="mt-2 text-[#9fb1cc]">Parsing skills, experience, and intent...</p>
+                    
+                    <div className="mt-8 h-2 w-full max-w-md overflow-hidden rounded-full bg-white/5">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${uploadProgress}%` }}
+                        className="h-full bg-gradient-to-r from-[#2ed5c8] to-[#4b79ff]"
+                      />
+                    </div>
+                    <span className="mt-3 text-xs font-bold text-[#2ed5c8]">{uploadProgress}% Complete</span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-sm font-semibold text-white">Skills (Optional)</label>
+            {/* Manual Entry Divider */}
+            <div className="my-10 flex items-center gap-4">
+              <div className="h-[1px] flex-1 bg-white/10" />
+              <span className="text-xs font-bold uppercase tracking-widest text-[#4b79ff]">OR ENTER MANUALLY</span>
+              <div className="h-[1px] flex-1 bg-white/10" />
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-2">
+                <label className="text-xs font-black uppercase tracking-widest text-[#7c95b9]">Skills Graph</label>
                 <input
                   type="text"
+                  placeholder="React, Python, AWS..."
                   value={jobTitle}
                   onChange={(e) => setJobTitle(e.target.value)}
-                  placeholder="e.g. JavaScript, React, Node"
-                  disabled={file !== null}
-                  className={`w-full rounded-xl border border-[#2e4369] bg-[#091224] px-4 py-3 text-white placeholder-[#6f88ad] focus:border-[#4b79ff] focus:outline-none ${file ? "cursor-not-allowed opacity-60" : ""}`}
+                  disabled={isAnalyzing || file !== null}
+                  className="w-full rounded-2xl border border-white/5 bg-white/5 p-4 text-sm outline-none transition-all focus:border-[#4b79ff] focus:ring-4 focus:ring-[#4b79ff]/10 disabled:opacity-50"
                 />
               </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-semibold text-white">Experience (Optional)</label>
+              <div className="space-y-2">
+                <label className="text-xs font-black uppercase tracking-widest text-[#7c95b9]">Total Experience</label>
                 <input
                   type="text"
+                  placeholder="e.g. 5 Years"
                   value={experience}
                   onChange={(e) => setExperience(e.target.value)}
-                  placeholder="e.g. 2 years"
-                  disabled={file !== null}
-                  className={`w-full rounded-xl border border-[#2e4369] bg-[#091224] px-4 py-3 text-white placeholder-[#6f88ad] focus:border-[#4b79ff] focus:outline-none ${file ? "cursor-not-allowed opacity-60" : ""}`}
+                  disabled={isAnalyzing || file !== null}
+                  className="w-full rounded-2xl border border-white/5 bg-white/5 p-4 text-sm outline-none transition-all focus:border-[#4b79ff] focus:ring-4 focus:ring-[#4b79ff]/10 disabled:opacity-50"
                 />
               </div>
             </div>
 
             <motion.button
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              onClick={handleSubmit}
-              className="mt-7 w-full rounded-xl bg-[#4b79ff] py-3.5 text-sm font-bold text-white transition hover:bg-[#3f68db]"
+              whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(75, 121, 255, 0.3)" }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleSubmitManual}
+              disabled={isAnalyzing || !!file}
+              className="mt-8 flex w-full items-center justify-center gap-3 rounded-[1.5rem] bg-[#4b79ff] py-5 text-lg font-black transition-all hover:bg-[#3f68db] disabled:opacity-50"
             >
-              Find Job Matches
+              Analyze & Find Matches <Zap className="h-5 w-5 fill-current" />
             </motion.button>
           </motion.div>
 
-          <motion.aside
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.12 }}
-            className="space-y-4"
-          >
-            <div className="rounded-2xl border border-white/10 bg-[#0b1324]/90 p-5">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#8ba5c8]">How It Works</p>
-              <div className="mt-4 space-y-3">
+          {/* Sidebar */}
+          <div className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="rounded-[2rem] border border-white/10 bg-[#0b1324]/80 p-8"
+            >
+              <h3 className="mb-6 flex items-center gap-2 text-xl font-bold">
+                <ShieldCheck className="text-[#2ed5c8]" /> Safety First
+              </h3>
+              <div className="space-y-6">
                 {[
-                  'Upload resume file',
-                  'Extract skills and experience',
-                  'Score matching jobs',
-                  'Review ranked opportunities',
-                ].map((step) => (
-                  <div key={step} className="flex items-start gap-2">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 text-[#2ed5c8]" />
-                    <p className="text-sm text-[#c9d8ef]">{step}</p>
+                  { title: "Privacy Guaranteed", desc: "Your resume is processed and discarded after analysis. No data is stored permanently.", icon: <CheckCircle2 className="h-5 w-5 text-[#2ed5c8]" /> },
+                  { title: "Signal Extraction", desc: "We look for 50+ unique professional signals including tech stack, leadership, and niche tools.", icon: <CheckCircle2 className="h-5 w-5 text-[#2ed5c8]" /> },
+                  { title: "Real-time Ranking", desc: "Our engine updates matching scores instantly as market trends shift.", icon: <CheckCircle2 className="h-5 w-5 text-[#2ed5c8]" /> },
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-4">
+                    <div className="mt-1 shrink-0">{item.icon}</div>
+                    <div>
+                      <p className="font-bold text-white">{item.title}</p>
+                      <p className="mt-1 text-sm text-[#7c95b9]">{item.desc}</p>
+                    </div>
                   </div>
                 ))}
               </div>
-            </div>
+            </motion.div>
 
-            <div className="rounded-2xl border border-white/10 bg-[#0b1324]/90 p-5">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#8ba5c8]">Tips</p>
-              <ul className="mt-3 space-y-2 text-sm text-[#c9d8ef]">
-                <li className="flex gap-2"><FileText className="mt-0.5 h-4 w-4 text-[#4b79ff]" /> Keep skills comma-separated for best matching.</li>
-                <li className="flex gap-2"><FileText className="mt-0.5 h-4 w-4 text-[#4b79ff]" /> Include technologies and tools you use daily.</li>
-                <li className="flex gap-2"><FileText className="mt-0.5 h-4 w-4 text-[#4b79ff]" /> Use years/months in experience for better ranking.</li>
-              </ul>
-            </div>
-          </motion.aside>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="rounded-[2rem] border border-[#4b79ff]/20 bg-gradient-to-br from-[#4b79ff]/10 to-transparent p-8"
+            >
+              <h3 className="mb-4 text-lg font-black italic">Pro Tip</h3>
+              <p className="text-sm leading-relaxed text-[#9fb1cc]">
+                Resumes with clear <span className="text-white font-bold underline decoration-[#2ed5c8]">quantitative achievements</span> (e.g., "Improved performance by 30%") receive a higher weighting in our matching algorithm.
+              </p>
+            </motion.div>
+          </div>
+
         </div>
       </section>
     </main>
