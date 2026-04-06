@@ -47,14 +47,20 @@ type ExternalJob = {
   experience?: string;
 };
 
+const LOADING_MESSAGES = [
+  "Analyzing Resume...",
+  "Mapping Skills...",
+  "Scanning Job Market...",
+  "Calculating Match Scores...",
+];
+
 // --- Components ---
 
 const LoadingState = () => {
-  const messages = ["Analyzing Resume...", "Mapping Skills...", "Scanning Job Market...", "Calculating Match Scores..."];
   const [msgIdx, setMsgIdx] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => setMsgIdx((prev) => (prev + 1) % messages.length), 1500);
+    const interval = setInterval(() => setMsgIdx((prev) => (prev + 1) % LOADING_MESSAGES.length), 1500);
     return () => clearInterval(interval);
   }, []);
 
@@ -76,13 +82,13 @@ const LoadingState = () => {
         </div>
       </div>
       <motion.p 
-        key={messages[msgIdx]}
+        key={LOADING_MESSAGES[msgIdx]}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
         className="text-lg font-bold text-[#9fb1cc]"
       >
-        {messages[msgIdx]}
+        {LOADING_MESSAGES[msgIdx]}
       </motion.p>
     </div>
   );

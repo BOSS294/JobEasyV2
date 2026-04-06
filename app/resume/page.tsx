@@ -251,7 +251,7 @@ const UploadResumeCard: React.FC = () => {
             >
               <h3 className="mb-4 text-lg font-black italic">Pro Tip</h3>
               <p className="text-sm leading-relaxed text-[#9fb1cc]">
-                Resumes with clear <span className="text-white font-bold underline decoration-[#2ed5c8]">quantitative achievements</span> (e.g., "Improved performance by 30%") receive a higher weighting in our matching algorithm.
+                Resumes with clear <span className="text-white font-bold underline decoration-[#2ed5c8]">quantitative achievements</span> (e.g., &ldquo;Improved performance by 30%&rdquo;) receive a higher weighting in our matching algorithm.
               </p>
             </motion.div>
           </div>
