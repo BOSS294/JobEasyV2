@@ -1,13 +1,15 @@
 'use client';
 
-import React, { useRef, useState, Suspense } from 'react';
+import React, { useRef, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Float, Stars, Sphere, MeshDistortMaterial, PerspectiveCamera } from '@react-three/drei';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { 
-  Sparkles, Shield, Zap, Search, ArrowRight, CheckCircle2, 
-  Hexagon, Star, Menu, X, Rocket, Cpu, Globe, Users, Clock3, BrainCircuit, FileCheck2, Lock 
+  Shield, Zap, Search,
+  Hexagon, Star, Cpu, Globe, Users, Clock3, BrainCircuit, FileCheck2, Lock 
 } from 'lucide-react';
+import Banner1 from './Banner1';
+import Navbar from './Navbar';
 
 // --- 3D BACKGROUND COMPONENTS (React Three Fiber) ---
 function Scene() {
@@ -29,31 +31,6 @@ function Scene() {
     </>
   );
 }
-
-// --- UI COMPONENTS ---
-
-const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  return (
-    <nav className="fixed top-0 z-[100] w-full px-6 py-4">
-      <div className="mx-auto flex max-w-7xl items-center justify-between rounded-2xl border border-white/10 bg-[#050913]/40 px-6 py-3 backdrop-blur-2xl">
-        <div className="flex items-center gap-2">
-          <Hexagon className="h-8 w-8 text-[#2ed5c8] fill-[#2ed5c8]/20" />
-          <span className="text-2xl font-black tracking-tighter text-white">JobEasy<span className="text-[#4b79ff]">.ai</span></span>
-        </div>
-        <div className="hidden md:flex items-center gap-8 text-sm font-bold text-[#9fb1cc]">
-          <a href="#features" className="hover:text-[#2ed5c8] transition-colors">Intelligence</a>
-          <a href="#stats" className="hover:text-[#2ed5c8] transition-colors">Outcomes</a>
-          <a href="#reviews" className="hover:text-[#2ed5c8] transition-colors">Testimonials</a>
-          <button className="rounded-xl bg-white px-5 py-2.5 text-[#04070d] hover:bg-[#2ed5c8] transition-all">Launch App</button>
-        </div>
-        <button className="md:hidden text-white" onClick={() => setIsOpen(!isOpen)}>
-          {isOpen ? <X /> : <Menu />}
-        </button>
-      </div>
-    </nav>
-  );
-};
 
 type FeatureCardProps = {
   icon: React.ComponentType<{ className?: string }>;
@@ -118,12 +95,6 @@ const faqs = [
 export default function LandingPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: containerRef });
-  
-  // Parallax Values
-  const yHero = useTransform(scrollYProgress, [0, 0.2], ["0%", "20%"]);
-  const rotateHero = useTransform(scrollYProgress, [0, 0.2], [0, 5]);
-  const scaleHero = useTransform(scrollYProgress, [0, 0.1], [1, 0.9]);
-  const opacityHero = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
   return (
     <main ref={containerRef} className="relative min-h-screen bg-[#04070d] text-white selection:bg-[#2ed5c8]/30">
@@ -141,59 +112,7 @@ export default function LandingPage() {
       <Navbar />
 
       {/* 2. HERO SECTION */}
-      <section className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 pt-20 overflow-hidden">
-        <motion.div 
-          style={{ y: yHero, rotateX: rotateHero, scale: scaleHero, opacity: opacityHero }}
-          className="text-center"
-        >
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#2ed5c8]/30 bg-[#2ed5c8]/10 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-[#2ed5c8]"
-          >
-            <Sparkles className="h-3 w-3" /> Next-Gen Resume Intelligence
-          </motion.div>
-          <h1 className="max-w-5xl text-6xl font-black leading-[1.1] tracking-tighter md:text-8xl lg:text-9xl">
-            Match with <br />
-            <span className="bg-gradient-to-b from-white to-[#4b79ff] bg-clip-text text-transparent">Precision.</span>
-          </h1>
-          <p className="mx-auto mt-8 max-w-2xl text-lg font-medium text-[#9fb1cc] md:text-xl">
-            The world&apos;s most advanced AI-powered job matching engine. Analyze skills, uncover gaps, and land your dream role in seconds.
-          </p>
-          <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <button className="group relative flex h-14 items-center justify-center gap-3 overflow-hidden rounded-2xl bg-[#2ed5c8] px-8 text-lg font-black text-[#04070d] transition-all hover:scale-105 active:scale-95">
-              Get Started Free <ArrowRight className="transition-transform group-hover:translate-x-1" />
-            </button>
-            <button className="h-14 rounded-2xl border border-white/10 bg-white/5 px-8 text-lg font-bold backdrop-blur-xl transition-all hover:bg-white/10">
-              Watch Demo
-            </button>
-          </div>
-        </motion.div>
-
-        {/* Floating 3D Dashboard Mockup */}
-        <motion.div 
-          initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5, duration: 1 }}
-          className="relative mt-20 w-full max-w-6xl rounded-3xl border border-white/10 bg-gradient-to-b from-white/5 to-transparent p-2 backdrop-blur-sm"
-        >
-          <div className="aspect-video w-full rounded-2xl bg-[#0a111f] shadow-2xl overflow-hidden border border-white/5">
-             <div className="flex h-full w-full items-center justify-center text-white/20">
-                <Rocket className="h-20 w-20 animate-pulse" />
-             </div>
-          </div>
-          {/* Parallax elements inside hero */}
-          <motion.div 
-            style={{ y: useTransform(scrollYProgress, [0, 0.5], [0, -100]) }}
-            className="absolute -right-8 top-1/4 rounded-2xl border border-[#2ed5c8]/40 bg-[#0d1729]/90 p-4 shadow-2xl backdrop-blur-xl md:flex hidden"
-          >
-            <div className="flex items-center gap-3">
-              <div className="h-12 w-12 rounded-full bg-[#2ed5c8]/20 flex items-center justify-center"><CheckCircle2 className="text-[#2ed5c8]" /></div>
-              <div>
-                <p className="text-xs text-[#9fb1cc]">Match Accuracy</p>
-                <p className="text-xl font-black">98.4%</p>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      </section>
+      <Banner1 />
 
       {/* 3. BENTO FEATURES */}
       <section id="features" className="relative z-10 px-6 py-32">
