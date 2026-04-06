@@ -19,7 +19,7 @@
     "lucide-react": "^0.503.0",
     "mammoth": "^1.9.0",
     "motion": "^12.9.4",
-    "next": "15.1.6",
+    "next": "15.1.11",
     "next-auth": "^4.24.11",
     "node-nlp": "^5.0.0-alpha.5",
     "pdf-lib": "^1.17.1",
