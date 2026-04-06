@@ -3,7 +3,7 @@
 import React, { useRef, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Float, Stars, Sphere, MeshDistortMaterial, PerspectiveCamera } from '@react-three/drei';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   Shield, Zap, Search,
   Hexagon, Star, Cpu, Globe, Users, Clock3, BrainCircuit, FileCheck2, Lock 
@@ -94,7 +94,6 @@ const faqs = [
 
 export default function LandingPage() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: containerRef });
 
   return (
     <main ref={containerRef} className="relative min-h-screen bg-[#04070d] text-white selection:bg-[#2ed5c8]/30">
